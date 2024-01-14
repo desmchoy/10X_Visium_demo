@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#$ -S /bin/bash
+#$ -l tmem=60G
+#$ -l h_vmem=60G
+#$ -l h_rt=48:00:00
+#$ -N TenX_Visium_secondary_analysis
+#$ -cwd
+
+PATH=/share/apps/gcc-8.3/bin:/share/apps/hdf5-1.12.1/bin:$HOME/.local/bin:$PATH
+LD_LIBRARY_PATH=/share/apps/gcc-8.3/lib64:/share/apps/hdf5-1.12.1/lib:$LD_LIBRARY_PATH
+source /share/apps/source_files/R/R-4.0.2.source
+
+
+echo ${JOB_NAME} "for "${input}
+echo "=========="
+echo ""
+echo "Job "${JOB_ID} "starts "$(date)" on "$(hostname)
+echo ""
+##########
+
+#sample=$(echo $input | sed 's/_/\t/g' | awk '{print $1}')
+
+
+mkdir ${SGE_O_WORKDIR}/results_secondary_analysis/"${input}"
+cd ${SGE_O_WORKDIR}/results_secondary_analysis/"${input}"
+mkdir tables pca_statistics clustering_SCT diff_exp_RNA plots
+cd ${SGE_O_WORKDIR}
+
+
+echo "#####"
+echo "Starting analysis"
+echo "#####"
+
+
+species=Human
+lowerlimit=200
+upperlimit=2500
+mitolimit=10
+corefeatures=3000
+numberofPCs=30
+
+
+
+Rscript ${SGE_O_WORKDIR}/10X_Visium_secondary_analysis.R $input $species ${SGE_O_WORKDIR}/results_spaceranger/"${input}"/"${input}"/outs $lowerlimit $upperlimit $mitolimit $corefeatures $numberofPCs
+
+Rscript ${SGE_O_WORKDIR}/10X_Visium_secondary_analysis_plot.R $input
+
+
+
+
+##########
+echo ""
+echo "Job "${JOB_ID} "ends "$(date)
+

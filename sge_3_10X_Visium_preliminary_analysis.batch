@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#$ -S /bin/bash
+#$ -l tmem=30G
+#$ -l h_vmem=30G
+#$ -l h_rt=0:20:00
+#$ -N TenX_Visium_preliminary_analysis
+#$ -cwd
+
+source /share/apps/source_files/R/R-4.0.2.source
+
+
+echo ${JOB_NAME} "for "${input}
+echo "=========="
+echo ""
+echo "Job "${JOB_ID} "starts "$(date)" on "$(hostname)
+echo ""
+##########
+
+
+mkdir ${SGE_O_WORKDIR}/results_preliminary_analysis/"${input}"
+cd ${SGE_O_WORKDIR}/results_preliminary_analysis/"${input}"
+mkdir tables plots
+cd ${SGE_O_WORKDIR}
+
+
+echo "#####"
+echo "Starting analysis"
+echo "#####"
+
+
+species=Human
+
+
+Rscript ${SGE_O_WORKDIR}/10X_Visium_preliminary_analysis.R $input $species ${SGE_O_WORKDIR}/results_spaceranger/"${input}"/"${input}"/outs
+
+
+
+##########
+echo ""
+echo "Job "${JOB_ID} "ends "$(date)
+

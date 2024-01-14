@@ -1,0 +1,51 @@
+#!/bin/bash
+
+#$ -S /bin/bash
+#$ -pe smp 4
+#$ -l tmem=80G
+#$ -l h_vmem=80G
+#$ -l h_rt=24:00:00
+#$ -N spaceranger
+#$ -cwd
+
+export PATH=/share/apps/genomics/bcl2fastq2-2.20/bin:$PATH
+export PATH=/share/apps/genomics/spaceranger-2.0.0/bin:$PATH
+
+
+slide=$(cat ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_config.csv | sed 's/\./\t/g' | awk '{print $1}')
+area=$(cat ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_config.csv | sed 's/\./\t/g' | awk '{print $2}')
+
+
+echo ${JOB_NAME} "for "${sample}
+echo "=========="
+echo ""
+echo "Job "${JOB_ID} "starts "$(date)" on "$(hostname)
+echo ""
+##########
+
+
+mkdir ${SGE_O_WORKDIR}/results_spaceranger/${sample}
+cd ${SGE_O_WORKDIR}/results_spaceranger/${sample}
+
+
+echo "#####"
+echo "Starting 10X Space Ranger Pipeline"
+echo "#####"
+
+
+NO_OF_CORES=4
+MEMORY_REQUIRED=72
+
+
+#spaceranger count --localcores ${NO_OF_CORES} --localmem ${MEMORY_REQUIRED} --id ${sample} --transcriptome /SAN/colcc/cellranger_references/refdata-gex-GRCh38-2020-A --fastqs ${SGE_O_WORKDIR}/RAW/${sample}/. --image ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_tissue_image.tif --slide $slide --area $area --probe-set ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_probe_set.csv --sample ${sample}_1,${sample}_2
+
+spaceranger count --localcores ${NO_OF_CORES} --localmem ${MEMORY_REQUIRED} --id ${sample} --transcriptome /SAN/colcc/cellranger_references/refdata-gex-GRCh38-2020-A --fastqs ${SGE_O_WORKDIR}/RAW/${sample}/. --cytaimage ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_CytAssist_image.tif --slide $slide --area $area --probe-set ${SGE_O_WORKDIR}/spaceranger_inputs/${sample}_probe_set.csv --sample ${sample}_1,${sample}_2
+
+
+
+
+##########
+echo ""
+echo "Job "${JOB_ID} "ends "$(date)
+
+
